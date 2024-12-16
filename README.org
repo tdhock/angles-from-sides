@@ -1,0 +1,6 @@
+** 16 Dec 2024
+
+[[file:fire-angles.R]] makes
+
+[[file:fire-angles.png]]
+
