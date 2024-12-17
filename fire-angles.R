@@ -90,10 +90,10 @@ gg <- ggplot()+
   coord_equal()+
   scale_x_continuous(
     'x coordinate (inches = pouces = ")',
-    limits=c(-10,NA))+
+    limits=c(-10,70), breaks=seq(-100,100,10))+
   scale_y_continuous(
     'y coordinate (inches = pouces = ")',
-    limits=c(-60,NA))
+    limits=c(-60,10), breaks=seq(-100,100,10))
 png("fire-angles.png", width=7, height=7, units="in", res=200)
 print(gg)
 dev.off()
@@ -119,7 +119,10 @@ angle.dt <- result.wide[, {
   C=h(before,after)
   radians <- acos((A^2+B^2-C^2)/(2*A*B))
   data.table(more[i], degrees=360*radians/(2*pi))
-}, by=algorithm]
+}, by=algorithm
+][
+, round.degrees := round(degrees,1)
+][]
 dist.dt <- result.wide[, {
   more <- .SD[c(1:.N,1)]
   i <- seq(2, nrow(more))
@@ -128,9 +131,6 @@ dist.dt <- result.wide[, {
   h <- function(a,b)sqrt(rowSums((a-b)^2))
   data.table((before+here)/2, dist=h(before,here))
 }, by=algorithm]
-only <- function(DT)DT[algorithm=="Manual"]
-angle.show <- only(angle.dt)[, round.degrees := round(degrees,1)][]
-dist.show <- only(dist.dt)
 gg <- ggplot()+
   ggtitle(paste0(
     "Hocking fabrication, Dec 2024, Sum of angles shown: ",
@@ -142,25 +142,79 @@ gg <- ggplot()+
       point,as.character(round.degrees),x,y),
     hjust=ifelse(x==0, 1, 0),
     vjust=ifelse(y < -10, 1, 0)),
-    data=angle.show)+
+    data=angle.dt)+
   geom_polygon(aes(
     x,y),
     fill=NA,
     color="black",
-    data=angle.show)+
+    data=angle.dt)+
   geom_point(aes(
     x,y),
-    data=angle.show)+
+    data=angle.dt)+
   geom_label(aes(
     x,y,label=sprintf('%.2f"',dist)),
-    data=dist.show)+
+    data=dist.dt)+
   coord_equal()+
   scale_x_continuous(
     'x coordinate (inches = pouces = ")',
-    limits=c(-10,70))+
+    limits=c(-10,70), breaks=seq(-100,100,10))+
   scale_y_continuous(
     'y coordinate (inches = pouces = ")',
-    limits=c(-60,10))
+    limits=c(-60,10), breaks=seq(-100,100,10))
 png("fire-angles-manual.png", width=7, height=7, units="in", res=200)
+print(gg)
+dev.off()
+
+angle.both <- rbind(angle.show, angle.dt)
+dist.both <- rbind(dist.show, dist.dt)
+gg <- ggplot()+
+  ggtitle("Hocking fabrication, Dec 2024")+
+  facet_grid(. ~ algorithm, labeller=label_both)+
+  geom_label(aes(
+    x,y,label=sprintf(
+      '%s\n%s°\nx= %.2f"\ny= %.2f"',
+      point,as.character(round.degrees),x,y),
+    hjust=ifelse(x==0, 1, 0),
+    vjust=ifelse(y < -10, 1, 0)),
+    data=angle.both)+
+  geom_polygon(aes(
+    x,y),
+    fill=NA,
+    color="black",
+    data=angle.both)+
+  geom_point(aes(
+    x,y),
+    data=angle.both)+
+  geom_label(aes(
+    x,y,label=sprintf('%.2f"',dist)),
+    data=dist.both)+
+  coord_equal()+
+  scale_x_continuous(
+    'x coordinate (inches = pouces = ")',
+    limits=c(-10,70), breaks=seq(-100,100,10))+
+  scale_y_continuous(
+    'y coordinate (inches = pouces = ")',
+    limits=c(-60,10), breaks=seq(-100,100,10))
+png("fire-angles-both.png", width=14, height=7, units="in", res=200)
+print(gg)
+dev.off()
+
+gg <- ggplot()+
+  ggtitle("Hocking fabrication, Dec 2024")+
+  scale_size_manual(values=c(
+    Manual=2,
+    BFGS=4))+
+  geom_polygon(aes(
+    x,y, color=algorithm, size=algorithm),
+    fill=NA,
+    data=angle.both)+
+  coord_equal()+
+  scale_x_continuous(
+    'x coordinate (inches = pouces = ")',
+    limits=c(-10,70), breaks=seq(-100,100,10))+
+  scale_y_continuous(
+    'y coordinate (inches = pouces = ")',
+    limits=c(-60,10), breaks=seq(-100,100,10))
+png("fire-angles-superposition.png", width=7, height=7, units="in", res=200)
 print(gg)
 dev.off()

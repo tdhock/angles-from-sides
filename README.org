@@ -5,3 +5,7 @@
 [[file:fire-angles.png]]
 
 [[file:fire-angles-manual.png]]
+
+[[file:fire-angles-both.png]]
+
+[[file:fire-angles-superposition.png]]
