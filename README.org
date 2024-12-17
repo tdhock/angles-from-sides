@@ -4,3 +4,4 @@
 
 [[file:fire-angles.png]]
 
+[[file:fire-angles-manual.png]]
