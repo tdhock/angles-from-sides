@@ -65,16 +65,16 @@ ggplot()+
 only <- function(DT)DT[algorithm=="BFGS"]
 angle.show <- only(angle.dt)[, round.degrees := round(degrees,1)][]
 dist.show <- only(dist.dt)
-off <- 0.5
 gg <- ggplot()+
   ggtitle(paste0(
     "Hocking fabrication, Dec 2024, Sum of angles shown: ",
     sum(angle.show$round.degrees),
     "°"))+
   geom_label(aes(
-    x-off,y-off,label=sprintf('%s\n%.1f°\nx= %.2f"\ny= %.2f"',point,degrees,x,y)),
-    hjust=1,
-    vjust=1,
+    x,y,
+    hjust=ifelse(x==0, 1, 0),
+    vjust=ifelse(y < -10, 1, 0),
+    label=sprintf('%s\n%.1f°\nx= %.2f"\ny= %.2f"',point,degrees,x,y)),
     data=angle.show)+
   geom_polygon(aes(
     x,y),
@@ -94,7 +94,7 @@ gg <- ggplot()+
   scale_y_continuous(
     'y coordinate (inches = pouces = ")',
     limits=c(-60,10), breaks=seq(-100,100,10))
-png("fire-angles.png", width=7, height=7, units="in", res=200)
+png("fire-angles.png", width=8, height=7, units="in", res=200)
 print(gg)
 dev.off()
 
@@ -161,15 +161,19 @@ gg <- ggplot()+
   scale_y_continuous(
     'y coordinate (inches = pouces = ")',
     limits=c(-60,10), breaks=seq(-100,100,10))
-png("fire-angles-manual.png", width=7, height=7, units="in", res=200)
+png("fire-angles-manual.png", width=8, height=7, units="in", res=200)
 print(gg)
 dev.off()
 
-angle.both <- rbind(angle.show, angle.dt)
-dist.both <- rbind(dist.show, dist.dt)
+algo2design <- data.table(
+  algorithm=c("BFGS","Manual"),
+  design=c("initial","revised"))
+both <- function(...)rbind(...)[algo2design,on="algorithm"]
+angle.both <- both(angle.show, angle.dt)
+dist.both <- both(dist.show, dist.dt)
 gg <- ggplot()+
   ggtitle("Hocking fabrication, Dec 2024")+
-  facet_grid(. ~ algorithm, labeller=label_both)+
+  facet_grid(. ~ design, labeller=label_both)+
   geom_label(aes(
     x,y,label=sprintf(
       '%s\n%s°\nx= %.2f"\ny= %.2f"',
@@ -201,20 +205,21 @@ dev.off()
 
 gg <- ggplot()+
   ggtitle("Hocking fabrication, Dec 2024")+
+  theme(legend.position=c(0.9,0.1))+
   scale_size_manual(values=c(
-    Manual=2,
-    BFGS=4))+
+    revised=2,
+    initial=4))+
   geom_polygon(aes(
-    x,y, color=algorithm, size=algorithm),
+    x,y, color=design, size=design),
     fill=NA,
     data=angle.both)+
   coord_equal()+
   scale_x_continuous(
     'x coordinate (inches = pouces = ")',
-    limits=c(-10,70), breaks=seq(-100,100,10))+
+    breaks=seq(-100,100,10))+
   scale_y_continuous(
     'y coordinate (inches = pouces = ")',
-    limits=c(-60,10), breaks=seq(-100,100,10))
-png("fire-angles-superposition.png", width=7, height=7, units="in", res=200)
+    breaks=seq(-100,100,10))
+png("fire-angles-superposition.png", width=8, height=7, units="in", res=200)
 print(gg)
 dev.off()
