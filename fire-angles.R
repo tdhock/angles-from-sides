@@ -16,14 +16,10 @@ result.dt <- data.table(
   result,
   xa=0, ya=-44.5, xe=43, ye=0, xf=0, yf=0,
   algorithm=rownames(result))
-result.long <- melt(
+result.wide <- melt(
   result.dt,
-  measure.vars=measure(coord, point, pattern="([xy])([a-f])"),
-  value.name="pos")
-result.wide <- dcast(
-  result.long,
-  algorithm + point ~ coord,
-  value.var="pos")
+  measure.vars=measure(value.name, point, pattern="([xy])([a-f])")
+)[order(algorithm,point)]
 
 angle.dt <- result.wide[, {
   more <- .SD[c(1:.N,1:2)]
@@ -101,12 +97,12 @@ dev.off()
 ## manual
 p <- function(point, x, y)data.table(point,x,y)
 result.wide <- data.table(algorithm="Manual", rbind(
-  p("f",0,0),
-  p("a",0,-44.5),
-  p("b",25.4,-48.73),
-  p("c",48.11,-37.13),
-  p("d",57.35,-18.565),
-  p("e",48.11,0)))
+  p("A",0,0),
+  p("B",0,-44.5),
+  p("C",27,-54),
+  p("D",50,-40.5),
+  p("E",55.25,-12.25),
+  p("F",45.125,0)))
 angle.dt <- result.wide[, {
   more <- .SD[c(1:.N,1:2)]
   i <- seq(2, nrow(more)-1)
@@ -160,7 +156,7 @@ gg <- ggplot()+
     limits=c(-10,70), breaks=seq(-100,100,10))+
   scale_y_continuous(
     'y coordinate (inches = pouces = ")',
-    limits=c(-60,10), breaks=seq(-100,100,10))
+    limits=c(-70,10), breaks=seq(-100,100,10))
 png("fire-angles-manual.png", width=8, height=7, units="in", res=200)
 print(gg)
 dev.off()

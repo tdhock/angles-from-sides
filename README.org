@@ -1,3 +1,10 @@
+** 17 Dec 2024
+
+[[file:fire-angles-equal.R]] makes an optimization trying to constrain
+three angles to be the same (CDE),
+
+[[file:fire-angles-equal.png]]
+
 ** 16 Dec 2024
 
 [[file:fire-angles.R]] makes
